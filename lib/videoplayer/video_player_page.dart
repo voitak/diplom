@@ -38,6 +38,26 @@ class _VideoPlayerState extends State<VideoPlayer> {
 //    if (mounted) setState(() {});
 //  }
 
+  showAlertDialog(BuildContext context) {
+    AlertDialog alert = AlertDialog(
+      content: Row(
+        children: [
+          const CircularProgressIndicator(),
+          Container(
+              margin: const EdgeInsets.only(left: 15),
+              child: const Text("Processing...")),
+        ],
+      ),
+    );
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
   void selectVideo(String path) async {
     await vidServ.onNewVideoSelected(path).then((value) async {
       // Replace with the new controller
@@ -270,6 +290,10 @@ class _VideoPlayerState extends State<VideoPlayer> {
                                       final newDateRange =
                                           await showDateRangePicker(
                                         context: context,
+                                        initialDateRange: DateTimeRange(
+                                          start: firstDate,
+                                          end: lastDate,
+                                        ),
                                         firstDate: firstDate,
                                         lastDate: lastDate,
                                         //initialDateRange: dateRange ?? initialDateRange,
@@ -308,12 +332,13 @@ class _VideoPlayerState extends State<VideoPlayer> {
                                           }
                                         }
 
+                                        showAlertDialog(context);
                                         await vidServ.videoMerger(
                                             camServ.currentFPSLevel,
                                             camServ.directoryPhone.path);
+                                        Navigator.pop(context);
 
-                                        print(
-                                            'PATH - ${camServ.directoryPhone.path}');
+                                        print('PATH - ${camServ.directoryPhone.path}');
                                         print('MERGER!');
 
                                         if (vidServ.isInitialised) {

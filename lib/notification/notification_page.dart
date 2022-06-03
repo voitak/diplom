@@ -15,6 +15,7 @@ class NotificationPage extends StatefulWidget {
 }
 
 class _NotificationPageState extends State<NotificationPage> {
+  bool isNotificationPermissionGranted = false;
   bool isSwitched = false;
   String time = 'NaN';
 
@@ -22,42 +23,9 @@ class _NotificationPageState extends State<NotificationPage> {
   void initState() {
     super.initState();
     AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
-      if (!isAllowed) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text(NotificationData.dialogTitle),
-            content: const Text(NotificationData.dialogText),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text(
-                  NotificationData.dialogDeny,
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 18,
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: () => AwesomeNotifications()
-                    .requestPermissionToSendNotifications()
-                    .then((_) => Navigator.pop(context)),
-                child: const Text(
-                  NotificationData.dialogAllow,
-                  style: TextStyle(
-                    color: Colors.teal,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              )
-            ],
-          ),
-        );
-      }
+      setState(() {
+        isNotificationPermissionGranted = isAllowed;
+      });
     });
 
     AwesomeNotifications().actionStream.listen(
@@ -97,126 +65,131 @@ class _NotificationPageState extends State<NotificationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppBar(
-            title: const Text(
-              NotificationData.notificationAppBar,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 30,
-              ),
-            ),
-            backgroundColor: Colors.black54,
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              20.0,
-              10.0,
-              20.0,
-              0.0,
-            ),
-            child: Row(
-              /*
+      body: isNotificationPermissionGranted
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppBar(
+                  title: const Text(
+                    NotificationData.notificationAppBar,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 30,
+                    ),
+                  ),
+                  backgroundColor: Colors.black,
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    20.0,
+                    10.0,
+                    20.0,
+                    0.0,
+                  ),
+                  child: Row(
+                    /*
               Set on/aff notification
                */
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  NotificationData.notificationInfo,
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 30,
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
-                Switch(
-                  value: isSwitched,
-                  onChanged: (value) async {
-                    if (value) {
-                      var list = await AwesomeNotifications()
-                          .listScheduledNotifications();
-                      for (var test in list) {
-                        var parsedMap = test.schedule?.toMap();
-                        if (parsedMap!.isNotEmpty) {
-                          String hour = parsedMap['hour'].toString().padLeft(2, '0');
-                          String minute = parsedMap['minute'].toString().padLeft(2, '0');
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        NotificationData.notificationInfo,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 30,
+                          fontWeight: FontWeight.w300,
+                        ),
+                      ),
+                      Switch(
+                        value: isSwitched,
+                        onChanged: (value) async {
+                          if (value) {
+                            var list = await AwesomeNotifications()
+                                .listScheduledNotifications();
+                            for (var test in list) {
+                              var parsedMap = test.schedule?.toMap();
+                              if (parsedMap!.isNotEmpty) {
+                                String hour = parsedMap['hour']
+                                    .toString()
+                                    .padLeft(2, '0');
+                                String minute = parsedMap['minute']
+                                    .toString()
+                                    .padLeft(2, '0');
 
+                                setState(() {
+                                  time = hour + ':' + minute;
+                                });
+                                print('TIME - $time');
+                              }
+                            }
+                          } else {
+                            cancelScheduledNotifications();
+                            setState(() {
+                              time = 'NaN';
+                            });
+                          }
                           setState(() {
-                            time = hour + ':' + minute;
+                            isSwitched = value;
                           });
-                          print('TIME - $time');
-                        }
-                      }
-                    } else {
-                      cancelScheduledNotifications();
-                      setState(() {
-                        time = 'NaN';
-                      });
-                    }
-                    setState(() {
-                      isSwitched = value;
-                    });
-                  },
-                  activeTrackColor: Colors.black26,
-                  activeColor: Colors.black,
-                ),
-              ],
-            ),
-          ),
-          Visibility(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  //Get time of created notification
-                  Text(
-                    'Daily notification set on: $time',
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w300,
-                    ),
+                        },
+                        activeTrackColor: Colors.black26,
+                        activeColor: Colors.black,
+                      ),
+                    ],
                   ),
-                  /*
+                ),
+                Visibility(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        //Get time of created notification
+                        Text(
+                          'Daily notification set on: $time',
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w300,
+                          ),
+                        ),
+                        /*
                   Create daily reminder on selected time
                    */
-                  TextButton(
-                    onPressed: () async {
-                      NotificationTime? pickedSchedule =
-                          await pickSchedule(context);
+                        TextButton(
+                          onPressed: () async {
+                            NotificationTime? pickedSchedule =
+                                await pickSchedule(context);
 
-                      if (pickedSchedule != null) {
-                        cancelScheduledNotifications();
-                        createReminderNotification(pickedSchedule);
-                        String hour = pickedSchedule.timeOfDay.hour
-                            .toString()
-                            .padLeft(2, '0');
-                        String minute = pickedSchedule.timeOfDay.minute
-                            .toString()
-                            .padLeft(2, '0');
+                            if (pickedSchedule != null) {
+                              cancelScheduledNotifications();
+                              createReminderNotification(pickedSchedule);
+                              String hour = pickedSchedule.timeOfDay.hour
+                                  .toString()
+                                  .padLeft(2, '0');
+                              String minute = pickedSchedule.timeOfDay.minute
+                                  .toString()
+                                  .padLeft(2, '0');
 
-                        setState(() {
-                          time = hour + ':' + minute;
-                        });
-                      }
-                    },
-                    child: const Text(
-                      NotificationData.createNotificationInfo,
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                              setState(() {
+                                time = hour + ':' + minute;
+                              });
+                            }
+                          },
+                          child: const Text(
+                            NotificationData.createNotificationInfo,
+                            style: TextStyle(
+                              color: Colors.black54,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ),
-            visible: isSwitched,
-          ),
+                  visible: isSwitched,
+                ),
 //          Column(
 //            children: [
 //              TextButton(
@@ -278,8 +251,82 @@ class _NotificationPageState extends State<NotificationPage> {
 //              )
 //            ],
 //          ),
-        ],
-      ),
+              ],
+            )
+          : Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(),
+                const Text(
+                  NotificationData.deniedPermission,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.black,
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text(NotificationData.dialogTitle),
+                        content: const Text(NotificationData.dialogText),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text(
+                              NotificationData.dialogDeny,
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () => AwesomeNotifications()
+                                .requestPermissionToSendNotifications()
+                                .then((_) {
+                              AwesomeNotifications()
+                                  .isNotificationAllowed()
+                                  .then((isAllowed) {
+                                setState(() {
+                                  isNotificationPermissionGranted = isAllowed;
+                                });
+                              });
+                              Navigator.pop(context);
+                            }),
+                            child: const Text(
+                              NotificationData.dialogAllow,
+                              style: TextStyle(
+                                color: Colors.teal,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    );
+                  },
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(
+                      NotificationData.givePermission,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
     );
   }
 }

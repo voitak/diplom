@@ -61,9 +61,12 @@ class TestTile extends StatelessWidget {
                 });
           },
           //onLongPress: _callback,
-          child: Image.file(
-            camServ.allFileList[index],
-            fit: BoxFit.cover,
+          child: AspectRatio(
+            aspectRatio: 1,
+            child: Image.file(
+              camServ.allFileList[index],
+              fit: BoxFit.cover,
+            ),
           ),
         ),
       ),

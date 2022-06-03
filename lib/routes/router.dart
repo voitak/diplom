@@ -12,26 +12,6 @@ import 'package:flutter_app/videoplayer/video_player_page.dart';
   replaceInRouteName: 'Page,Route',
   routes: [
     AutoRoute(path: '/', page: HomePage, children: [
-//      AutoRoute(
-//        path: 'posts',
-//        name: 'PostsRouter',
-//        page: EmptyRouterPage,
-//        children: [
-//          CustomRoute(
-//            transitionsBuilder: TransitionsBuilders.noTransition,
-//            durationInMilliseconds: 0,
-//            path: '',
-//            page: PostsPage,
-//          ),
-//          CustomRoute(
-//            transitionsBuilder: TransitionsBuilders.fadeIn,
-//            durationInMilliseconds: 0,
-//            path: ':postId',
-//            page: SinglePostPage,
-//          ),
-//          RedirectRoute(path: '*', redirectTo: ''),
-//        ],
-//      ),
       AutoRoute(
         path: 'captures',
         name: 'CapturesRouter',

@@ -1,6 +1,7 @@
 class NotificationData {
   static const notificationAppBar = 'Notification';
   static const deniedPermission = 'Permission denied';
+  static const givePermission = 'Give permission';
   static const loading = 'LOADING...';
   static const dialogTitle = 'Allow Notification';
   static const dialogText = 'Our app would like to send you notification';

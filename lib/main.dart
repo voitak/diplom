@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/routes/router.gr.dart';
@@ -18,6 +19,8 @@ VideoPlayerService vidServ = VideoPlayerService();
 Future<void> main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
+    SystemChrome.setPreferredOrientations(
+        [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
     //Initialising scheduled notification channel
     AwesomeNotifications().initialize(
       '',
@@ -36,6 +39,7 @@ Future<void> main() async {
     camServ.directoryPhone = (Platform.isAndroid
         ? await getExternalStorageDirectory()
         : await getApplicationDocumentsDirectory())!;
+    //getApplicationSupportDirectory - iOS
   } on CameraException catch (e) {
     print('ERROR: $e');
   }

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter_app/routes/router.gr.dart';
 import 'package:flutter_app/captures/data/captures_data.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:focused_menu/focused_menu.dart';
 import 'package:focused_menu/modals.dart';
 import 'package:intl/intl.dart';
@@ -69,9 +70,10 @@ class _CapturesPageState extends State<CapturesPage> {
                     setState(() {
                       camServ.isReverseSort = !camServ.isReverseSort;
                     });
-                    camServ.isReverseSort
-                        ? camServ.reverseSort()
-                        : camServ.sort();
+                    camServ.allFileList = camServ.allFileList.reversed.toList();
+//                  camServ.isReverseSort
+//                      ? camServ.reverseSort()
+//                      : camServ.sort();
                   },
                   icon: camServ.isReverseSort
                       ? Transform.rotate(
@@ -133,78 +135,158 @@ class _CapturesPageState extends State<CapturesPage> {
             /*
             Show all available images
              */
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 3,
-              children: List.generate(camServ.allFileList.length, (index) {
-                return FocusedMenuHolder(
-                    menuWidth: MediaQuery.of(context).size.width * 0.4,
-                    animateMenuItems: false,
-                    duration: const Duration(milliseconds: 200),
-                    child: TestTile(
-                      index,
-                    ),
-                    onPressed: () {},
-                    menuItems: [
-                      /*
+//            CustomScrollView(
+//              slivers: [
+//                SliverToBoxAdapter(
+//                  child:
+            MasonryGridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 3,
+                itemCount: camServ.allFileList.length,
+                itemBuilder: (context, index) {
+                  return FocusedMenuHolder(
+                      menuWidth: MediaQuery.of(context).size.width * 0.4,
+                      animateMenuItems: false,
+                      duration: const Duration(milliseconds: 200),
+                      child: TestTile(
+                        index,
+                      ),
+                      onPressed: () {},
+                      menuItems: [
+                        /*
                       Get taken time of selected image
                        */
-                      FocusedMenuItem(
-                        title: Text(
-                          DateFormat('dd/MM/yyyy, HH:mm')
-                              .format(DateTime.fromMillisecondsSinceEpoch(
-                                  int.parse(camServ.allFileList[index].path
-                                      .split('/')
-                                      .last
-                                      .split('.')
-                                      .first)))
-                              .toString(),
-                          style: const TextStyle(color: Colors.black),
+                        FocusedMenuItem(
+                          title: Text(
+                            DateFormat('dd/MM/yyyy, HH:mm')
+                                .format(DateTime.fromMillisecondsSinceEpoch(
+                                    int.parse(camServ.allFileList[index].path
+                                        .split('/')
+                                        .last
+                                        .split('.')
+                                        .first)))
+                                .toString(),
+                            style: const TextStyle(color: Colors.black),
+                          ),
+                          onPressed: () {},
                         ),
-                        onPressed: () {},
-                      ),
-                      /*
+                        /*
                       Share selected image
                        */
-                      FocusedMenuItem(
-                        title: const Text(CapturesData.share),
-                        trailingIcon: const Icon(
-                          Icons.share,
-                        ),
-                        onPressed: () {
-                          Share.shareFiles(
-                              [camServ.allFileList[index].path.toString()]);
-                        },
-                      ),
-                      /*
-                      Delete selected image
-                       */
-                      FocusedMenuItem(
-                          title: const Text(CapturesData.delete),
+                        FocusedMenuItem(
+                          title: const Text(CapturesData.share),
                           trailingIcon: const Icon(
-                            Icons.delete,
-                            color: Colors.redAccent,
+                            Icons.share,
                           ),
                           onPressed: () {
-                            setState(() {
-                              camServ.allFileList[index].delete();
-                              camServ.allFileList
-                                  .remove(camServ.allFileList[index]);
-                              if (camServ.allFileList.isNotEmpty) {
-                                camServ.isReverseSort
-                                    ? camServ.imageFile =
-                                        camServ.allFileList.first
-                                    : camServ.imageFile =
-                                        camServ.allFileList.last;
-                              } else {
-                                camServ.imageFile = null;
-                              }
-                            });
-                          }),
-                    ]);
-              }),
-            ),
+                            Share.shareFiles(
+                                [camServ.allFileList[index].path.toString()]);
+                          },
+                        ),
+                        /*
+                      Delete selected image
+                       */
+                        FocusedMenuItem(
+                            title: const Text(CapturesData.delete),
+                            trailingIcon: const Icon(
+                              Icons.delete,
+                              color: Colors.redAccent,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                camServ.allFileList[index].delete();
+                                camServ.allFileList
+                                    .remove(camServ.allFileList[index]);
+                                if (camServ.allFileList.isNotEmpty) {
+                                  camServ.isReverseSort
+                                      ? camServ.imageFile =
+                                          camServ.allFileList.first
+                                      : camServ.imageFile =
+                                          camServ.allFileList.last;
+                                } else {
+                                  camServ.imageFile = null;
+                                }
+                              });
+                            }),
+                      ]);
+                }),
+            //        ),
+//           )
+//          ],
+//           ),
+//            GridView.count(
+//              shrinkWrap: true,
+//              physics: const NeverScrollableScrollPhysics(),
+//              crossAxisCount: 3,
+//              children: List.generate(camServ.allFileList.length, (index) {
+//                return FocusedMenuHolder(
+//                    menuWidth: MediaQuery.of(context).size.width * 0.4,
+//                    animateMenuItems: false,
+//                    duration: const Duration(milliseconds: 200),
+//                    child: TestTile(
+//                      index,
+//                    ),
+//                    onPressed: () {},
+//                    menuItems: [
+//                      /*
+//                      Get taken time of selected image
+//                       */
+//                      FocusedMenuItem(
+//                        title: Text(
+//                          DateFormat('dd/MM/yyyy, HH:mm')
+//                              .format(DateTime.fromMillisecondsSinceEpoch(
+//                                  int.parse(camServ.allFileList[index].path
+//                                      .split('/')
+//                                      .last
+//                                      .split('.')
+//                                      .first)))
+//                              .toString(),
+//                          style: const TextStyle(color: Colors.black),
+//                        ),
+//                        onPressed: () {},
+//                      ),
+//                      /*
+//                      Share selected image
+//                       */
+//                      FocusedMenuItem(
+//                        title: const Text(CapturesData.share),
+//                        trailingIcon: const Icon(
+//                          Icons.share,
+//                        ),
+//                        onPressed: () {
+//                          Share.shareFiles(
+//                              [camServ.allFileList[index].path.toString()]);
+//                        },
+//                      ),
+//                      /*
+//                      Delete selected image
+//                       */
+//                      FocusedMenuItem(
+//                          title: const Text(CapturesData.delete),
+//                          trailingIcon: const Icon(
+//                            Icons.delete,
+//                            color: Colors.redAccent,
+//                          ),
+//                          onPressed: () {
+//                            setState(() {
+//                              camServ.allFileList[index].delete();
+//                              camServ.allFileList
+//                                  .remove(camServ.allFileList[index]);
+//                              if (camServ.allFileList.isNotEmpty) {
+//                                camServ.isReverseSort
+//                                    ? camServ.imageFile =
+//                                        camServ.allFileList.first
+//                                    : camServ.imageFile =
+//                                        camServ.allFileList.last;
+//                              } else {
+//                                camServ.imageFile = null;
+//                              }
+//                            });
+//                          }),
+//                    ]);
+//              }),
+//            ),
           ],
         ),
       ),
