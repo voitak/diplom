@@ -24,5 +24,5 @@ This Flutter project is devoted to the development of a mobile application for c
 
 ## Example
 
-[![Watch the video]](https://user-images.githubusercontent.com/57760057/191709303-d6fce8ca-25ec-40bf-a344-fea23fa2dc55.mp4)
+https://user-images.githubusercontent.com/57760057/191711354-69e8859d-d405-4a11-a681-39589e804707.mp4
 
